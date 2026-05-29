@@ -21,6 +21,14 @@ analysis:
     api_key: ${OPENAI_API_KEY}
     model: ${OPENAI_MODEL:-gpt-4o}
 
+# AIB (Assets in a Box) integration - optional
+# When configured, Falco alerts are enriched with asset metadata, blast radius,
+# and audit findings from the AIB graph before LLM analysis.
+aib:
+  url: ${AIB_BASE_URL:-}
+  api_token: ${AIB_API_TOKEN:-}
+  cache_ttl: 300  # seconds
+
 # Storage backend: loki or vm (auto-detected from STACK env var)
 storage:
   backend: ${STACK:-loki}
