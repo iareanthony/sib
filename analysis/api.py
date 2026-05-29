@@ -363,6 +363,44 @@ ANALYSIS_TEMPLATE = """
             <p>{{ analysis.summary or 'No summary available.' }}</p>
         </div>
         
+        {% if aib_context and aib_context.node %}
+        <h2>🗺️ Asset Context (AIB)</h2>
+        <div class="card">
+            <div class="section">
+                <div class="label">Asset ID</div>
+                <div class="value" style="font-family: monospace;">{{ aib_context.node_id }}</div>
+            </div>
+            {% set meta = aib_context.node.get('metadata') or aib_context.node.get('properties') or {} %}
+            {% for key in ['environment', 'team', 'criticality', 'owner', 'service'] %}
+            {% if meta.get(key) %}
+            <div class="section">
+                <div class="label">{{ key|title }}</div>
+                <div class="value">{{ meta[key] }}</div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% if aib_context.blast_radius %}
+            {% set affected = aib_context.blast_radius.get('affected_nodes') or aib_context.blast_radius.get('nodes') or [] %}
+            {% if affected %}
+            <div class="section">
+                <div class="label">Blast Radius</div>
+                <div class="value">{{ affected|length }} downstream assets</div>
+            </div>
+            {% endif %}
+            {% endif %}
+            {% if aib_context.audit_findings %}
+            <div class="section">
+                <div class="label">Pre-existing Audit Findings</div>
+                <ul class="mitigation-list">
+                    {% for f in aib_context.audit_findings %}
+                    <li>{{ f.get('title') or f.get('finding') or f if f is mapping else f }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
         {% if show_mapping and obfuscation_mapping %}
         <h2>🔐 Obfuscation Mapping</h2>
         <div class="card">
@@ -465,6 +503,7 @@ def save_to_cache(cache_key: str, result: dict, original_output: str, rule: str,
         'analysis': result.get('analysis', {}),
         'obfuscated_output': result.get('obfuscated_alert', {}).get('output', '') if isinstance(result.get('obfuscated_alert'), dict) else '',
         'obfuscation_mapping': result.get('obfuscation_mapping', {}),
+        'aib_context': result.get('aib_context', {}),
         'dedup_count': 1,
         'last_seen': datetime.now().isoformat(),
     }
@@ -620,7 +659,8 @@ def analyze_api():
         return jsonify({
             'success': True,
             'analysis': result.get('analysis', {}),
-            'obfuscation_mapping': result.get('obfuscation_mapping', {})
+            'obfuscation_mapping': result.get('obfuscation_mapping', {}),
+            'aib_context': result.get('aib_context', {}),
         })
         
     except Exception as e:
@@ -649,13 +689,14 @@ def analyze_page():
         show_mapping = request.args.get('show_mapping', 'false').lower() == 'true'
         
         if not output:
-            return render_template_string(ANALYSIS_TEMPLATE, 
+            return render_template_string(ANALYSIS_TEMPLATE,
                 error="No alert output provided. Use ?output=... parameter.",
                 analysis={},
                 original_output='',
                 obfuscated_output='',
                 severity_class='',
                 obfuscation_mapping={},
+                aib_context={},
                 show_mapping=False,
                 timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 cached=False
@@ -679,6 +720,7 @@ def analyze_page():
                 obfuscated_output=cached_result.get('obfuscated_output', ''),
                 severity_class=severity_class,
                 obfuscation_mapping=cached_result.get('obfuscation_mapping', {}),
+                aib_context=cached_result.get('aib_context', {}),
                 show_mapping=show_mapping,
                 timestamp=cached_result.get('timestamp', 'cached'),
                 cached=True
@@ -726,11 +768,12 @@ def analyze_page():
             obfuscated_output=obfuscated_output,
             severity_class=severity_class,
             obfuscation_mapping=result.get('obfuscation_mapping', {}),
+            aib_context=result.get('aib_context', {}),
             show_mapping=show_mapping,
             timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             cached=False
         )
-        
+
     except Exception as e:
         logger.exception("Analysis page failed")
         return render_template_string(ANALYSIS_TEMPLATE,
@@ -740,6 +783,7 @@ def analyze_page():
             obfuscated_output='',
             severity_class='',
             obfuscation_mapping={},
+            aib_context={},
             show_mapping=False,
             timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
             cached=False
@@ -813,6 +857,7 @@ def history_detail(cache_key: str):
         obfuscated_output=cached.get('obfuscated_output', ''),
         severity_class=severity_class,
         obfuscation_mapping=cached.get('obfuscation_mapping', {}),
+        aib_context=cached.get('aib_context', {}),
         show_mapping=False,
         timestamp=cached.get('timestamp', 'cached'),
         cached=True

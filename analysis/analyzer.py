@@ -273,7 +273,7 @@ class AnthropicProvider(LLMProvider):
 
 class AlertAnalyzer:
     """Main analyzer class that coordinates obfuscation and LLM analysis."""
-    
+
     def __init__(self, config: dict):
         self.config = config
         self.backend = config.get('storage', {}).get('backend', 'loki')
@@ -286,7 +286,23 @@ class AlertAnalyzer:
             self.backend = 'loki'
         self.obfuscation_level = config.get('analysis', {}).get('obfuscation_level', 'standard')
         self.provider = self._create_provider()
+        self.aib_client = self._create_aib_client()
     
+    def _create_aib_client(self):
+        """Create AIB client if configured. Returns None if AIB is not set up."""
+        aib_cfg = self.config.get('aib', {})
+        base_url = aib_cfg.get('url') or os.environ.get('AIB_BASE_URL', '')
+        if not base_url:
+            return None
+        try:
+            from aib_bridge import AIBClient
+            api_token = aib_cfg.get('api_token') or os.environ.get('AIB_API_TOKEN')
+            ttl = int(aib_cfg.get('cache_ttl', 300))
+            return AIBClient(base_url, api_token=api_token, ttl=ttl)
+        except ImportError:
+            print("aib_bridge not found — AIB enrichment disabled", file=sys.stderr)
+            return None
+
     def _create_provider(self) -> LLMProvider:
         """Create the configured LLM provider."""
         analysis_config = self.config.get('analysis', {})
@@ -346,7 +362,16 @@ class AlertAnalyzer:
         """Analyze a single alert."""
         # Obfuscate the alert
         obfuscated, mapping = obfuscate_alert(alert, self.obfuscation_level)
-        
+
+        # Enrich with AIB asset context (graceful — alert still analyzed without it)
+        aib_context: dict = {}
+        if self.aib_client:
+            try:
+                from aib_bridge import format_aib_context
+                aib_context = self.aib_client.enrich_alert(alert)
+            except Exception as e:
+                print(f"AIB enrichment skipped: {e}", file=sys.stderr)
+
         # Build the prompt
         labels = alert.get('_labels', {})
         user_prompt = USER_PROMPT_TEMPLATE.format(
@@ -360,18 +385,26 @@ class AlertAnalyzer:
             process=obfuscated.get('output_fields', {}).get('proc.name', 'N/A'),
             parent_process=obfuscated.get('output_fields', {}).get('proc.pname', 'N/A'),
         )
-        
+
+        # Append AIB context to prompt if available
+        if aib_context:
+            from aib_bridge import format_aib_context
+            aib_section = format_aib_context(aib_context)
+            if aib_section:
+                user_prompt += aib_section
+
         if dry_run:
             return {
                 'obfuscated_prompt': user_prompt,
                 'obfuscation_mapping': mapping,
+                'aib_context': aib_context,
                 'note': 'Dry run - no LLM call made'
             }
-        
+
         # Get quick MITRE mapping if available
         rule_name = labels.get('rule', alert.get('rule', ''))
         quick_mitre = MITRE_MAPPING.get(rule_name, None)
-        
+
         # Call LLM
         try:
             analysis = self.provider.analyze(SYSTEM_PROMPT, user_prompt)
@@ -380,11 +413,12 @@ class AlertAnalyzer:
                 'error': str(e),
                 'fallback_mitre': quick_mitre
             }
-        
+
         return {
             'original_alert': alert,
             'obfuscated_alert': obfuscated,
             'obfuscation_mapping': mapping,
+            'aib_context': aib_context,
             'analysis': analysis
         }
     

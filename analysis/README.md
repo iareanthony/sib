@@ -178,13 +178,20 @@ Analysis results are cached to avoid repeated LLM calls for the same event. Cach
 - Cache keys are normalized: timestamps, numeric IDs, IPs, and container IDs are stripped so similar events share a cache key
 - A `dedup_count` field tracks how many times the same alert was requested
 
+## AIB Integration (Asset Context)
+
+When [Assets in a Box (AIB)](../docs/aib-integration.md) is configured, alerts are enriched with asset metadata, blast radius, and pre-existing audit findings *before* reaching the LLM. This lets the model reason about real-world impact rather than just the raw event.
+
+Set `AIB_BASE_URL` in your `.env` to enable it — see **[docs/aib-integration.md](../docs/aib-integration.md)** for the full setup guide, data flow, and example output.
+
 ## How It Works
 
 1. **Alert Ingested** → Falco detects suspicious activity
-2. **Obfuscation** → Sensitive data replaced with tokens
-3. **LLM Analysis** → Security-focused prompt analyzes the alert
-4. **Enrichment** → Response parsed and attached to alert
-5. **Storage** → Enriched alert stored in Loki with analysis labels
+2. **AIB Enrichment** *(optional)* → Asset metadata, blast radius, and audit findings fetched
+3. **Obfuscation** → Sensitive data replaced with tokens
+4. **LLM Analysis** → Security-focused prompt analyzes the alert (with asset context if available)
+5. **Enrichment** → Response parsed and attached to alert
+6. **Storage** → Enriched alert stored in Loki with analysis labels
 
 ## Example Output
 
