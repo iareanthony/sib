@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/matijazezelj/sib-ansible:latest
+    image: sib-ansible:${SIB_ANSIBLE_VERSION:-local}
     volumes:
       # Mount ansible directory
       - .:/ansible:ro
