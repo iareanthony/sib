@@ -4,7 +4,7 @@ services:
     container_name: sib-analysis
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "${ANALYSIS_BIND:-127.0.0.1}:5000:5000"
     volumes:
       - ./config.yaml:/app/config.yaml:ro
       - analysis-cache:/app/cache
@@ -21,7 +21,7 @@ services:
       - OLLAMA_URL=${OLLAMA_URL:-http://host.docker.internal:11434}
       - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:14b}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
       interval: 30s
       timeout: 10s
       start_period: 15s

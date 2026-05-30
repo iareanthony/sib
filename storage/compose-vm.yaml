@@ -5,7 +5,7 @@
 
 services:
   victorialogs:
-    image: victoriametrics/victoria-logs:latest
+    image: victoriametrics/victoria-logs:${VICTORIALOGS_VERSION:-v1.50.0}
     container_name: sib-victorialogs
     restart: unless-stopped
     ports:
@@ -25,7 +25,7 @@ services:
       start_period: 10s
 
   victoriametrics:
-    image: victoriametrics/victoria-metrics:latest
+    image: victoriametrics/victoria-metrics:${VICTORIAMETRICS_VERSION:-v1.144.0}
     container_name: sib-victoriametrics
     restart: unless-stopped
     ports:
@@ -49,7 +49,7 @@ services:
       start_period: 10s
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION:-v1.11.1}
     container_name: sib-node-exporter
     restart: unless-stopped
     command:

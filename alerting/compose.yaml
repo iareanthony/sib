@@ -6,7 +6,7 @@ services:
     container_name: sib-sidekick
     restart: unless-stopped
     ports:
-      - "${LISTEN_ADDR:-0.0.0.0}:${SIDEKICK_PORT:-2801}:2801"
+      - "${SIDEKICK_BIND_ADDR:-127.0.0.1}:${SIDEKICK_PORT:-2801}:2801"
     volumes:
       - ./config/config.yaml:/etc/falcosidekick/config.yaml:ro
       # mTLS certificates (mounted when MTLS_ENABLED=true)
@@ -24,7 +24,7 @@ services:
       - sib-network
     healthcheck:
       # Check if port is listening (works with both HTTP and mTLS modes)
-      test: ["CMD-SHELL", "nc -z localhost 2801"]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 2801"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -6,7 +6,7 @@ services:
     container_name: sib-grafana
     restart: unless-stopped
     ports:
-      - "${LISTEN_ADDR:-0.0.0.0}:${GRAFANA_PORT:-3000}:3000"
+      - "${GRAFANA_BIND_ADDR:-127.0.0.1}:${GRAFANA_PORT:-3000}:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
@@ -25,7 +25,7 @@ services:
     networks:
       - sib-network
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/health"]
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000/api/health"]
       interval: 30s
       timeout: 10s
       retries: 3

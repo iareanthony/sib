@@ -138,7 +138,9 @@ Default Grafana credentials: `admin` / `admin`
 
 > **Note:** Only the services for your selected `STACK` will be running.
 
-> ⚠️ **Fleet Security Note:** Sidekick API (2801) is exposed externally so fleet hosts can send events. Use firewall rules to restrict access to your fleet nodes only:
+> 🔒 **Safe defaults:** Grafana, Falcosidekick, storage APIs, and AI analysis bind to `127.0.0.1` by default. To expose them on a LAN, set `GRAFANA_BIND_ADDR=0.0.0.0`, `SIDEKICK_BIND_ADDR=0.0.0.0`, `STORAGE_BIND=0.0.0.0`, or `ANALYSIS_BIND=0.0.0.0` intentionally.
+
+> ⚠️ **Fleet Security Note:** If fleet hosts need to send events to Sidekick (2801), expose it deliberately and use firewall rules to restrict access to your fleet nodes only:
 > ```bash
 > # UFW example: allow only from fleet subnet
 > ufw allow from 192.168.1.0/24 to any port 2801

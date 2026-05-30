@@ -8,7 +8,7 @@
 
 services:
   vmagent:
-    image: victoriametrics/vmagent:latest
+    image: victoriametrics/vmagent:${VMAGENT_VERSION:-v1.144.0}
     container_name: sib-vmagent
     hostname: ${HOSTNAME:-collector}
     restart: unless-stopped
@@ -22,7 +22,7 @@ services:
     network_mode: host
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:${NODE_EXPORTER_VERSION:-v1.11.1}
     container_name: sib-node-exporter
     hostname: ${HOSTNAME:-collector}
     restart: unless-stopped
@@ -39,7 +39,7 @@ services:
     pid: host
 
   vector:
-    image: timberio/vector:latest-alpine
+    image: timberio/vector:${VECTOR_VERSION:-0.55.0-alpine}
     container_name: sib-vector
     hostname: ${HOSTNAME:-collector}
     restart: unless-stopped
