@@ -16,7 +16,7 @@
                   php8.3-fpm, uwsgi, gunicorn, unicorn, puma, passenger)
 
 # ---------------------------------------------
-# Webshell â€” Shell Spawned by Web Process (T1505.003)
+# Webshell ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Shell Spawned by Web Process (T1505.003)
 # ---------------------------------------------
 
 - rule: Shell Spawned by Web Server
@@ -31,7 +31,7 @@
                    php, php-fpm, php7.4-fpm, php8.0-fpm, php8.1-fpm,
                    php8.2-fpm, php8.3-fpm, uwsgi, gunicorn) and
     proc.name in (sh, bash, dash, zsh, ash, ksh)
-  output: "Shell spawned by web server process (webshell indicator) (shell=%proc.name parent=%proc.pname command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Shell spawned by web server process webshell indicator user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [webserver, mitre_persistence, T1505.003]
 
@@ -49,7 +49,7 @@
                    php, php-fpm, php7.4-fpm, php8.0-fpm, php8.1-fpm,
                    php8.2-fpm, php8.3-fpm, uwsgi, gunicorn, sh, bash, dash) and
     proc.name in (nc, ncat, netcat, socat, python, python3, perl, ruby, lua)
-  output: "Reverse shell tool launched by web process (tool=%proc.name parent=%proc.pname command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Reverse shell tool launched by web process user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [webserver, mitre_execution, T1059]
 
@@ -74,7 +74,7 @@
      fd.name startswith "/usr/sbin/" or
      fd.name startswith "/bin/" or
      fd.name startswith "/sbin/")
-  output: "Web server process writing outside webroot (command=%proc.cmdline file=%fd.name user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Web server process writing outside webroot user=%user.name command=%proc.cmdline file=%fd.name"
   priority: HIGH
   tags: [webserver, mitre_persistence, T1505.003]
 
@@ -85,14 +85,14 @@
 - rule: Web Server Process Downloading File
   desc: >
     Detects a web server or its child processes using curl or wget to download
-    files â€” a common post-exploitation step to fetch additional payloads.
+    files ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â a common post-exploitation step to fetch additional payloads.
   condition: >
     spawned_process and
     proc.pname in (nginx, apache2, httpd, apache, lighttpd,
                    php, php-fpm, php7.4-fpm, php8.0-fpm, php8.1-fpm,
                    php8.2-fpm, php8.3-fpm, uwsgi, gunicorn, sh, bash, dash) and
     proc.name in (curl, wget, fetch, lwp-download)
-  output: "Web process downloading payload (command=%proc.cmdline parent=%proc.pname user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Web process downloading payload user=%user.name command=%proc.cmdline file=%fd.name"
   priority: HIGH
   tags: [webserver, mitre_command_and_control, T1105]
 
@@ -118,7 +118,7 @@
      fd.name contains "/mysql/my.cnf" or
      fd.name contains "wp-config.php" or
      fd.name contains ".env")
-  output: "Web process accessing sensitive system file (command=%proc.cmdline file=%fd.name user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Web process accessing sensitive system file user=%user.name command=%proc.cmdline file=%fd.name"
   priority: HIGH
   tags: [webserver, mitre_credential_access, T1552]
 
@@ -137,6 +137,6 @@
      fd.name contains "/var/log/httpd/" or
      fd.name contains "/var/log/lighttpd/") and
     proc.name not in (nginx, apache2, httpd, logrotate, rsyslog, syslog-ng)
-  output: "Web server log file modified by unexpected process (command=%proc.cmdline file=%fd.name user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Web server log file modified by unexpected process user=%user.name command=%proc.cmdline file=%fd.name"
   priority: HIGH
   tags: [webserver, mitre_defense_evasion, T1070.002]

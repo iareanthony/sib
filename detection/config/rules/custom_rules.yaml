@@ -14,7 +14,7 @@
   condition: >
     open_read and
     fd.name = "/etc/shadow"
-  output: "CRITICAL: Shadow file accessed (user=%user.name user_uid=%user.uid command=%proc.cmdline parent=%proc.pname container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "CRITICAL: Shadow file accessed user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [test, critical, shadow]
 
@@ -32,7 +32,7 @@
      proc.cmdline contains "pool.minexmr" or
      proc.cmdline contains "nanopool" or
      proc.cmdline contains "nicehash")
-  output: "Cryptocurrency miner detected (user=%user.name user_uid=%user.uid command=%proc.cmdline parent=%proc.pname container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Cryptocurrency miner detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [cryptomining, mitre_impact, T1496]
 
@@ -41,7 +41,7 @@
   condition: >
     outbound and
     fd.sport in (3333, 4444, 8888, 14444, 45700)
-  output: "Possible mining pool connection (user=%user.name command=%proc.cmdline connection=%fd.name container_id=%container.id container_name=%container.name)"
+  output: "Possible mining pool connection user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [cryptomining, network, mitre_impact]
 
@@ -58,7 +58,7 @@
     (proc.cmdline contains "/host" or
      proc.cmdline contains "nsenter" or
      proc.cmdline contains "/proc/1")
-  output: "Potential container escape via mount (user=%user.name command=%proc.cmdline container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Potential container escape via mount user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [container, escape, mitre_privilege_escalation, T1611]
 
@@ -69,7 +69,7 @@
     container and
     user.uid = 0 and
     not proc.name in (init, systemd, containerd, dockerd, runc)
-  output: "Container process running as root (user=%user.name command=%proc.cmdline container_id=%container.id container_name=%container.name image=%container.image.repository)"
+  output: "Container process running as root user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [container, root, mitre_privilege_escalation]
 
@@ -83,7 +83,7 @@
     outbound and
     (fd.sport in (4444, 5555, 6666, 7777, 8888, 9999, 1337, 31337) or
      fd.sport > 60000)
-  output: "Suspicious outbound connection (user=%user.name command=%proc.cmdline connection=%fd.name container_id=%container.id container_name=%container.name)"
+  output: "Suspicious outbound connection user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [network, suspicious, mitre_command_and_control]
 
@@ -100,7 +100,7 @@
     open_read and
     (fd.name = "/root/.aws/credentials" or
      fd.name contains "/.aws/credentials")
-  output: "AWS credentials file accessed (user=%user.name command=%proc.cmdline file=%fd.name container_id=%container.id container_name=%container.name)"
+  output: "AWS credentials file accessed user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [credential_access, aws, mitre_credential_access, T1552]
 
@@ -109,7 +109,7 @@
   condition: >
     open_read and
     fd.name startswith "/var/run/secrets/kubernetes.io"
-  output: "Kubernetes secrets accessed (user=%user.name command=%proc.cmdline file=%fd.name container_id=%container.id container_name=%container.name)"
+  output: "Kubernetes secrets accessed user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [credential_access, kubernetes, mitre_credential_access]
 
@@ -122,7 +122,7 @@
      fd.name contains "id_ecdsa" or
      fd.name contains "id_dsa") and
     not fd.name contains ".pub"
-  output: "SSH private key accessed (user=%user.name command=%proc.cmdline file=%fd.name container_id=%container.id)"
+  output: "SSH private key accessed user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [credential_access, ssh, mitre_credential_access, T1552.004]
 
@@ -136,7 +136,7 @@
     (open_write or evt.type = rename) and
     (fd.name startswith "/etc/cron" or
      fd.name startswith "/var/spool/cron")
-  output: "Crontab modified (user=%user.name command=%proc.cmdline file=%fd.name container_id=%container.id)"
+  output: "Crontab modified user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [persistence, cron, mitre_persistence, T1053.003]
 
@@ -147,7 +147,7 @@
     (fd.name startswith "/etc/systemd/system" or
      fd.name startswith "/lib/systemd/system") and
     fd.name endswith ".service"
-  output: "Systemd service created (user=%user.name command=%proc.cmdline file=%fd.name container_id=%container.id)"
+  output: "Systemd service created user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [persistence, systemd, mitre_persistence, T1543.002]
 
@@ -165,7 +165,7 @@
      proc.cmdline contains "| bash" or
      proc.cmdline contains "|sh" or
      proc.cmdline contains "|bash")
-  output: "Base64 decode piped to shell (user=%user.name command=%proc.cmdline parent=%proc.pname container_id=%container.id)"
+  output: "Base64 decode piped to shell user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [execution, base64, mitre_execution, T1059]
 
@@ -177,7 +177,7 @@
     (proc.cmdline contains "/tmp/" or
      proc.cmdline contains "/dev/shm/" or
      proc.cmdline contains "/var/tmp/")
-  output: "Download to suspicious location (user=%user.name command=%proc.cmdline container_id=%container.id container_name=%container.name)"
+  output: "Download to suspicious location user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [execution, download, mitre_execution]
 
@@ -196,7 +196,7 @@
       proc.cmdline contains "python -c" and proc.cmdline contains "socket") or
      (proc.name in (nc, ncat, netcat) and
       (proc.cmdline contains "-e" or proc.cmdline contains "-c")))
-  output: "Reverse shell detected (user=%user.name command=%proc.cmdline parent=%proc.pname container_id=%container.id container_name=%container.name)"
+  output: "Reverse shell detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [initial_access, reverse_shell, mitre_initial_access, T1059]
 
@@ -207,7 +207,7 @@
     (proc.cmdline contains "curl" or proc.cmdline contains "wget") and
     (proc.cmdline contains "| sh" or proc.cmdline contains "| bash" or
      proc.cmdline contains "|sh" or proc.cmdline contains "|bash")
-  output: "Remote script execution detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Remote script execution detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [initial_access, remote_execution, mitre_initial_access, T1190]
 
@@ -223,7 +223,7 @@
     (proc.cmdline contains "os-release" or
      proc.cmdline contains "/etc/issue" or
      proc.cmdline contains "-a" and proc.name = "uname")
-  output: "System information discovery (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "System information discovery user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [discovery, reconnaissance, mitre_discovery, T1082]
 
@@ -232,7 +232,7 @@
   condition: >
     spawned_process and
     proc.name in (ifconfig, ip, netstat, ss, arp, route)
-  output: "Network discovery (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Network discovery user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [discovery, network, mitre_discovery, T1016]
 
@@ -243,7 +243,7 @@
     proc.name in (ps, top, htop, pstree) and
     (proc.cmdline contains "aux" or proc.cmdline contains "-ef" or
      proc.cmdline contains "-e")
-  output: "Process discovery (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Process discovery user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [discovery, processes, mitre_discovery, T1057]
 
@@ -254,7 +254,7 @@
     (proc.name in (whoami, id, who, w, last, lastlog, users) or
      (proc.name = "cat" and proc.cmdline contains "/etc/passwd") or
      (proc.name = "getent" and proc.cmdline contains "passwd"))
-  output: "Account discovery (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Account discovery user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [discovery, accounts, mitre_discovery, T1087]
 
@@ -268,7 +268,7 @@
     spawned_process and
     proc.name in (ssh, scp, sftp) and
     container
-  output: "SSH from container detected (user=%user.name command=%proc.cmdline container_id=%container.id container_name=%container.name)"
+  output: "SSH from container detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [lateral_movement, ssh, mitre_lateral_movement, T1021.004]
 
@@ -278,7 +278,7 @@
     spawned_process and
     proc.name in (scp, rsync, rcp) and
     container
-  output: "Remote file copy detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Remote file copy detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [lateral_movement, file_transfer, mitre_lateral_movement, T1021]
 
@@ -287,7 +287,7 @@
   condition: >
     spawned_process and
     proc.name in (nmap, masscan, zmap, nc, netcat, ncat)
-  output: "Network scanning detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Network scanning detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [lateral_movement, scanning, mitre_lateral_movement, T1046]
 
@@ -302,7 +302,7 @@
     proc.name = "curl" and
     (proc.cmdline contains "-X POST" or proc.cmdline contains "--data" or
      proc.cmdline contains "-d " or proc.cmdline contains "-F ")
-  output: "Potential data exfiltration via curl (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Potential data exfiltration via curl user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [exfiltration, curl, mitre_exfiltration, T1048]
 
@@ -316,7 +316,7 @@
      proc.cmdline contains "/root" or
      proc.cmdline contains "passwd" or
      proc.cmdline contains ".ssh")
-  output: "Sensitive data archiving detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Sensitive data archiving detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [exfiltration, archive, mitre_exfiltration, T1560]
 
@@ -326,7 +326,7 @@
     spawned_process and
     proc.name in (dig, nslookup, host) and
     (proc.cmdline contains "TXT" or proc.cmdline contains "txt")
-  output: "Potential DNS exfiltration (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Potential DNS exfiltration user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [exfiltration, dns, mitre_exfiltration, T1048.003]
 
@@ -344,7 +344,7 @@
      proc.cmdline contains "/var" or
      proc.cmdline contains "/etc" or
      proc.cmdline contains "/*")
-  output: "Mass file deletion detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Mass file deletion detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [impact, destruction, mitre_impact, T1485]
 
@@ -354,7 +354,7 @@
     spawned_process and
     (proc.name = "systemctl" or proc.name = "service") and
     (proc.cmdline contains "stop" or proc.cmdline contains "disable")
-  output: "Service stopped (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Service stopped user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [impact, service_stop, mitre_impact, T1489]
 
@@ -365,7 +365,7 @@
     (proc.name = "dd" and
      (proc.cmdline contains "if=/dev/zero" or proc.cmdline contains "if=/dev/urandom") and
      (proc.cmdline contains "/dev/sd" or proc.cmdline contains "/dev/nvme"))
-  output: "Disk wipe attempt detected (user=%user.name command=%proc.cmdline)"
+  output: "Disk wipe attempt detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [impact, disk_wipe, mitre_impact, T1561]
 
@@ -382,7 +382,7 @@
      (proc.name in (echo, cat, tee) and
       (proc.cmdline contains "> /var/log" or proc.cmdline contains ">/var/log")) or
      (proc.name = "sed" and proc.cmdline contains "/var/log"))
-  output: "Log tampering detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Log tampering detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [defense_evasion, log_tampering, mitre_defense_evasion, T1070.002]
 
@@ -397,7 +397,7 @@
      (proc.name = "rm" and proc.cmdline contains ".zsh_history") or
      (proc.name in (truncate, shred) and
       (proc.cmdline contains ".bash_history" or proc.cmdline contains ".zsh_history")))
-  output: "History tampering detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "History tampering detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [defense_evasion, history_tampering, mitre_defense_evasion, T1070.003]
 
@@ -410,7 +410,7 @@
      proc.cmdline contains " -d " or
      proc.cmdline contains " --date" or
      proc.cmdline contains " -r ")
-  output: "Timestomping detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Timestomping detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [defense_evasion, timestomping, mitre_defense_evasion, T1070.006]
 
@@ -423,7 +423,7 @@
      proc.exepath contains "/dev/shm" or
      proc.exepath contains "/var/tmp" or
      proc.exepath contains "/run")
-  output: "Process masquerading detected (user=%user.name process=%proc.name path=%proc.exepath command=%proc.cmdline)"
+  output: "Process masquerading detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [defense_evasion, masquerading, mitre_defense_evasion, T1036]
 
@@ -432,7 +432,7 @@
   condition: >
     spawned_process and
     proc.name in (insmod, modprobe, rmmod)
-  output: "Kernel module operation detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Kernel module operation detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [defense_evasion, rootkit, mitre_defense_evasion, T1014]
 
@@ -453,7 +453,7 @@
        proc.cmdline contains "ufw")) or
      (proc.name = "setenforce" and proc.cmdline contains "0") or
      (proc.name = "aa-disable"))
-  output: "Security tool disabled (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Security tool disabled user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [defense_evasion, disable_security, mitre_defense_evasion, T1562.001]
 
@@ -472,7 +472,7 @@
      proc.cmdline contains "4777" or
      proc.cmdline contains "2755" or
      proc.cmdline contains "6755")
-  output: "SUID/SGID binary creation detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "SUID/SGID binary creation detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [privilege_escalation, suid, mitre_privilege_escalation, T1548.001]
 
@@ -481,7 +481,7 @@
   condition: >
     spawned_process and
     proc.name in (setcap, getcap, capsh)
-  output: "Capability manipulation detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Capability manipulation detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [privilege_escalation, capabilities, mitre_privilege_escalation, T1548]
 
@@ -492,7 +492,7 @@
     ((proc.name = "visudo") or
      (proc.name in (vim, vi, nano, sed, tee, echo, cat) and
       (proc.cmdline contains "/etc/sudoers" or proc.cmdline contains "/etc/sudoers.d")))
-  output: "Sudoers modification detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Sudoers modification detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [privilege_escalation, sudo, mitre_privilege_escalation, T1548.003]
 
@@ -504,7 +504,7 @@
     (proc.cmdline contains "/etc/passwd" or
      proc.cmdline contains "/etc/shadow" or
      proc.cmdline contains "/etc/group")
-  output: "Password file modification detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Password file modification detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [privilege_escalation, password_files, mitre_privilege_escalation, T1098]
 
@@ -518,7 +518,7 @@
      proc.cmdline contains "root" or
      proc.cmdline contains "admin" or
      proc.cmdline contains "docker")
-  output: "User added to privileged group (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "User added to privileged group user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [privilege_escalation, group_modification, mitre_privilege_escalation, T1098]
 
@@ -528,7 +528,7 @@
     spawned_process and
     (proc.name in (strace, ltrace, gdb, ptrace) or
      (proc.cmdline contains "ptrace" and proc.cmdline contains "attach"))
-  output: "Ptrace injection detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Ptrace injection detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [privilege_escalation, injection, mitre_privilege_escalation, T1055.008]
 
@@ -543,7 +543,7 @@
     proc.name = "nsenter" and
     (proc.cmdline contains "-t 1" or proc.cmdline contains "--target 1" or
      proc.cmdline contains "/proc/1")
-  output: "Container escape via nsenter detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Container escape via nsenter detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [container_escape, nsenter, mitre_privilege_escalation, T1611]
 
@@ -555,7 +555,7 @@
     (proc.cmdline contains "/var/run/docker.sock" or
      proc.cmdline contains "docker.sock" or
      proc.name = "docker")
-  output: "Docker socket access from container (user=%user.name command=%proc.cmdline container_id=%container.id container_name=%container.name)"
+  output: "Docker socket access from container user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [container_escape, docker_socket, mitre_privilege_escalation, T1611]
 
@@ -566,7 +566,7 @@
     proc.name = "mount" and
     (proc.cmdline contains "/host" or
      proc.cmdline contains ":/")
-  output: "Host filesystem mount detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Host filesystem mount detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [container_escape, mount, mitre_privilege_escalation, T1611]
 
@@ -576,7 +576,7 @@
     spawned_process and
     container and
     proc.name in (docker, podman, containerd, runc, ctr, crictl)
-  output: "Container runtime detected in container (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Container runtime detected in container user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [container_escape, runtime, mitre_execution, T1610]
 
@@ -587,7 +587,7 @@
     (proc.name = "bpftool" or
      proc.cmdline contains "bpf(" or
      proc.cmdline contains "BPF_PROG_LOAD")
-  output: "eBPF program loading detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "eBPF program loading detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [container_escape, ebpf, mitre_execution, T1611]
 
@@ -602,7 +602,7 @@
     (proc.cmdline contains "169.254.169.254" or
      proc.cmdline contains "metadata.google" or
      proc.cmdline contains "metadata.azure")
-  output: "Cloud metadata access detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Cloud metadata access detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [reconnaissance, cloud_metadata, mitre_discovery, T1552.005]
 
@@ -612,7 +612,7 @@
     spawned_process and
     (proc.cmdline contains "/var/run/secrets/kubernetes.io" or
      proc.cmdline contains "/run/secrets/kubernetes.io")
-  output: "K8s service account access detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "K8s service account access detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [credential_access, kubernetes, mitre_credential_access, T1528]
 
@@ -623,7 +623,7 @@
     (proc.name = "env" or
      proc.name = "printenv" or
      (proc.name = "cat" and proc.cmdline contains "/proc/" and proc.cmdline contains "/environ"))
-  output: "Environment enumeration detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Environment enumeration detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [reconnaissance, env_enum, mitre_discovery, T1082]
 
@@ -637,7 +637,7 @@
     spawned_process and
     proc.pname in (apache2, httpd, nginx, php-fpm, php, node, java, python, python3) and
     proc.name in (sh, bash, dash, zsh, ksh, csh, ash, cmd, powershell)
-  output: "Potential webshell activity detected (user=%user.name parent=%proc.pname command=%proc.cmdline container_id=%container.id)"
+  output: "Potential webshell activity detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [persistence, webshell, mitre_persistence, T1505.003]
 
@@ -647,7 +647,7 @@
     spawned_process and
     proc.name in (nc, netcat, ncat) and
     (proc.cmdline contains "-l" or proc.cmdline contains "--listen")
-  output: "Netcat listener detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Netcat listener detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [persistence, backdoor, mitre_persistence, T1505]
 
@@ -659,7 +659,7 @@
     (proc.cmdline contains "TCP-LISTEN" or
      proc.cmdline contains "EXEC" or
      proc.cmdline contains "PTY")
-  output: "Socat tunnel detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Socat tunnel detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [persistence, backdoor, mitre_command_and_control, T1572]
 
@@ -672,7 +672,7 @@
   condition: >
     spawned_process and
     proc.exepath startswith "/dev/shm"
-  output: "Binary executed from /dev/shm (user=%user.name process=%proc.name path=%proc.exepath command=%proc.cmdline)"
+  output: "Binary executed from /dev/shm user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [execution, dev_shm, mitre_defense_evasion, T1027]
 
@@ -682,7 +682,7 @@
     spawned_process and
     proc.exepath startswith "/proc/" and
     proc.exepath contains "/fd/"
-  output: "Binary executed from /proc (user=%user.name process=%proc.name path=%proc.exepath command=%proc.cmdline)"
+  output: "Binary executed from /proc user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [execution, fileless, mitre_defense_evasion, T1620]
 
@@ -691,7 +691,7 @@
   condition: >
     spawned_process and
     (proc.exepath contains "memfd:" or proc.exepath contains "(deleted)")
-  output: "Fileless execution detected via memfd (user=%user.name process=%proc.name path=%proc.exepath command=%proc.cmdline)"
+  output: "Fileless execution detected via memfd user=%user.name command=%proc.cmdline file=%fd.name"
   priority: CRITICAL
   tags: [execution, fileless, mitre_defense_evasion, T1620]
 
@@ -707,7 +707,7 @@
     proc.cmdline contains "cloudflare-dns.com" or
     proc.cmdline contains "1.1.1.1/dns-query" or
     proc.cmdline contains "8.8.8.8/dns-query"
-  output: "DNS over HTTPS detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "DNS over HTTPS detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [command_and_control, doh, mitre_command_and_control, T1071.004]
 
@@ -719,7 +719,7 @@
      proc.cmdline contains ".onion" or
      proc.cmdline contains "torproject.org" or
      proc.cmdline contains "9050" or proc.cmdline contains "9051")
-  output: "Tor connection attempt detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Tor connection attempt detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [command_and_control, tor, mitre_command_and_control, T1090.003]
 
@@ -728,7 +728,7 @@
   condition: >
     spawned_process and
     proc.name in (proxychains, tsocks, redsocks, chisel, ligolo, frp, ngrok)
-  output: "Proxy tool usage detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Proxy tool usage detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [command_and_control, proxy, mitre_command_and_control, T1090]
 
@@ -748,7 +748,7 @@
      proc.cmdline contains ".ssh" or
      proc.cmdline contains "passwd" or
      proc.cmdline contains "shadow")
-  output: "Data staging detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Data staging detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [collection, data_staging, mitre_collection, T1074.001]
 
@@ -758,7 +758,7 @@
     spawned_process and
     proc.name in (mysqldump, pg_dump, mongodump, redis-cli, sqlite3) and
     not proc.cmdline contains "backup"
-  output: "Database dump detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Database dump detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [collection, database_dump, mitre_collection, T1005]
 
@@ -767,6 +767,6 @@
   condition: >
     spawned_process and
     proc.name in (scrot, import, gnome-screenshot, xwd, xclip)
-  output: "Screen capture detected (user=%user.name command=%proc.cmdline container_id=%container.id)"
+  output: "Screen capture detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: NOTICE
   tags: [collection, screen_capture, mitre_collection, T1113]
