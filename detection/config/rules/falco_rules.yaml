@@ -84,10 +84,10 @@
     fd.name startswith /etc and
     not user_known_write_below_etc_activities
   output: >
-    File below /etc opened for writing 
-    (user=%user.name user_uid=%user.uid command=%proc.cmdline 
-     file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline 
-     gparent=%proc.aname[2] container_id=%container.id 
+    File below /etc opened for writing
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
+     file=%fd.name parent=%proc.pname pcmdline=%proc.pcmdline
+     gparent=%proc.aname[2] container_id=%container.id
      container_name=%container.name image=%container.image.repository)
   priority: ERROR
   tags: [filesystem, mitre_persistence, T1078]
@@ -101,9 +101,9 @@
      fd.name startswith /usr/bin or
      fd.name startswith /usr/sbin)
   output: >
-    File below binary directory opened for writing 
-    (user=%user.name user_uid=%user.uid command=%proc.cmdline 
-     file=%fd.name parent=%proc.pname container_id=%container.id 
+    File below binary directory opened for writing
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
+     file=%fd.name parent=%proc.pname container_id=%container.id
      container_name=%container.name image=%container.image.repository)
   priority: ERROR
   tags: [filesystem, mitre_persistence]
@@ -115,9 +115,9 @@
     fd.name in (sensitive_files) and
     not proc.name in (sudo, su, passwd, shadow)
   output: >
-    Sensitive file opened for reading 
-    (user=%user.name user_uid=%user.uid command=%proc.cmdline 
-     file=%fd.name parent=%proc.pname container_id=%container.id 
+    Sensitive file opened for reading
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
+     file=%fd.name parent=%proc.pname container_id=%container.id
      container_name=%container.name)
   priority: WARNING
   tags: [filesystem, mitre_credential_access, T1003]
@@ -129,15 +129,15 @@
 - rule: Terminal shell in container
   desc: A shell was spawned in a container with an attached terminal
   condition: >
-    spawned_process and 
+    spawned_process and
     container and
     proc.name in (shell_binaries) and
     proc.tty != 0
   output: >
-    Terminal shell in container 
-    (user=%user.name user_uid=%user.uid shell=%proc.name 
-     parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty 
-     container_id=%container.id container_name=%container.name 
+    Terminal shell in container
+    (user=%user.name user_uid=%user.uid shell=%proc.name
+     parent=%proc.pname cmdline=%proc.cmdline terminal=%proc.tty
+     container_id=%container.id container_name=%container.name
      image=%container.image.repository)
   priority: NOTICE
   tags: [container, shell, mitre_execution, T1059]
@@ -147,12 +147,12 @@
   condition: >
     spawned_process and
     proc.name in (shell_binaries) and
-    proc.pname in (httpd, nginx, apache, apache2, php, php-fpm, python, 
+    proc.pname in (httpd, nginx, apache, apache2, php, php-fpm, python,
                    python3, java, node, ruby, perl)
   output: >
-    Shell spawned by suspicious process 
-    (user=%user.name shell=%proc.name parent=%proc.pname 
-     grandparent=%proc.aname[2] cmdline=%proc.cmdline 
+    Shell spawned by suspicious process
+    (user=%user.name shell=%proc.name parent=%proc.pname
+     grandparent=%proc.aname[2] cmdline=%proc.cmdline
      container_id=%container.id container_name=%container.name)
   priority: WARNING
   tags: [process, shell, mitre_execution, T1059]
@@ -164,8 +164,8 @@
     container and
     proc.name in (package_mgmt_binaries)
   output: >
-    Package management process in container 
-    (user=%user.name command=%proc.cmdline container_id=%container.id 
+    Package management process in container
+    (user=%user.name command=%proc.cmdline container_id=%container.id
      container_name=%container.name image=%container.image.repository)
   priority: NOTICE
   tags: [container, package_management, mitre_persistence]
@@ -176,8 +176,8 @@
     (inbound or outbound) and
     proc.name in (at, cron, atd, crond, systemd, journald, init)
   output: >
-    System process network activity 
-    (user=%user.name command=%proc.cmdline connection=%fd.name 
+    System process network activity
+    (user=%user.name command=%proc.cmdline connection=%fd.name
      container_id=%container.id)
   priority: NOTICE
   tags: [network, system, mitre_command_and_control]
@@ -192,8 +192,8 @@
     outbound and
     not fd.net in (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
   output: >
-    Outbound connection to external network 
-    (user=%user.name command=%proc.cmdline connection=%fd.name 
+    Outbound connection to external network
+    (user=%user.name command=%proc.cmdline connection=%fd.name
      container_id=%container.id container_name=%container.name)
   priority: INFO
   tags: [network, mitre_command_and_control]
@@ -206,8 +206,8 @@
     (proc.cmdline contains "-e" or
      proc.cmdline contains "-c")
   output: >
-    Netcat remote code execution 
-    (user=%user.name command=%proc.cmdline parent=%proc.pname 
+    Netcat remote code execution
+    (user=%user.name command=%proc.cmdline parent=%proc.pname
      container_id=%container.id container_name=%container.name)
   priority: WARNING
   tags: [network, backdoor, mitre_execution, T1059]
@@ -223,8 +223,8 @@
     proc.name = sudo and
     user.uid != 0
   output: >
-    Sudo executed 
-    (user=%user.name user_uid=%user.uid command=%proc.cmdline 
+    Sudo executed
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
      parent=%proc.pname container_id=%container.id)
   priority: NOTICE
   tags: [users, mitre_privilege_escalation, T1548]
@@ -236,8 +236,8 @@
     (evt.arg.mode contains "S_ISUID" or
      evt.arg.mode contains "S_ISGID")
   output: >
-    Setuid/setgid bit set 
-    (user=%user.name user_uid=%user.uid command=%proc.cmdline 
+    Setuid/setgid bit set
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
      file=%fd.name container_id=%container.id)
   priority: WARNING
   tags: [users, mitre_privilege_escalation, T1548.001]
@@ -256,8 +256,8 @@
     (proc.name in (truncate, shred, rm) or
      evt.arg.flags contains O_TRUNC)
   output: >
-    Log file cleared 
-    (user=%user.name user_uid=%user.uid command=%proc.cmdline 
+    Log file cleared
+    (user=%user.name user_uid=%user.uid command=%proc.cmdline
      file=%fd.name container_id=%container.id)
   priority: WARNING
   tags: [mitre_defense_evasion, T1070]
@@ -271,7 +271,7 @@
      proc.cmdline contains "systemctl stop firewalld" or
      proc.cmdline contains "iptables -F")
   output: >
-    Security tool disabled 
+    Security tool disabled
     (user=%user.name command=%proc.cmdline container_id=%container.id)
   priority: WARNING
   tags: [mitre_defense_evasion, T1562]
@@ -289,8 +289,8 @@
       proc.cmdline contains "/etc/passwd" or
       proc.cmdline contains "/proc/version"))
   output: >
-    System information discovery 
-    (user=%user.name command=%proc.cmdline parent=%proc.pname 
+    System information discovery
+    (user=%user.name command=%proc.cmdline parent=%proc.pname
      container_id=%container.id container_name=%container.name)
   priority: INFO
   tags: [mitre_discovery, T1082]
@@ -301,8 +301,8 @@
     spawned_process and
     proc.name in (ifconfig, ip, netstat, ss, arp, route, nmap)
   output: >
-    Network discovery command 
-    (user=%user.name command=%proc.cmdline parent=%proc.pname 
+    Network discovery command
+    (user=%user.name command=%proc.cmdline parent=%proc.pname
      container_id=%container.id container_name=%container.name)
   priority: INFO
   tags: [mitre_discovery, T1016]

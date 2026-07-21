@@ -74,19 +74,6 @@ buffered_outputs: true
 output_timeout: 2000
 
 # ---------------------------------------------
-# gRPC Configuration
-# ---------------------------------------------
-
-# gRPC server for streaming events
-grpc:
-  enabled: false
-  bind_address: "unix:///run/falco/falco.sock"
-  threadiness: 0
-
-grpc_output:
-  enabled: false
-
-# ---------------------------------------------
 # Webserver (for health checks)
 # ---------------------------------------------
 
