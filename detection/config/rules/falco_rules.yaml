@@ -11,7 +11,7 @@
 # ---------------------------------------------
 
 - macro: spawned_process
-  condition: (evt.type in (execve, execveat) and evt.dir=<)
+  condition: (evt.type in (execve, execveat))
 
 - macro: container
   # Falco 0.44 moved container metadata enrichment out of the core syscall
@@ -27,34 +27,22 @@
 
 - macro: outbound
   condition: >
-    ((evt.type = connect and evt.dir=<) or
-     (evt.type in (sendto, sendmsg, sendmmsg) and evt.dir=< and fd.l4proto != udp and fd.connected=false and fd.name_changed=true)) and
+    ((evt.type = connect) or
+     (evt.type in (sendto, sendmsg, sendmmsg) and fd.l4proto != udp and fd.connected=false and fd.name_changed=true)) and
     (fd.typechar = 4 or fd.typechar = 6) and
     (fd.ip != "0.0.0.0" and fd.net != "127.0.0.0/8" and fd.net != "::1/128")
 
 - macro: inbound
   condition: >
-    ((evt.type = accept and evt.dir=<) or
-     (evt.type in (recvfrom, recvmsg) and evt.dir=< and fd.l4proto != udp and fd.connected=false and fd.name_changed=true)) and
+    ((evt.type = accept) or
+     (evt.type in (recvfrom, recvmsg) and fd.l4proto != udp and fd.connected=false and fd.name_changed=true)) and
     (fd.typechar = 4 or fd.typechar = 6)
-
-- macro: ssh_port
-  condition: (fd.sport = 22 or fd.lport = 22)
 
 - macro: never_true
   condition: (evt.num=0)
 
 - macro: user_known_write_below_etc_activities
   condition: (never_true)
-
-# Sensitive file directories
-- macro: sensitive_dirs
-  condition: >
-    fd.name startswith /etc or
-    fd.name startswith /usr/bin or
-    fd.name startswith /usr/sbin or
-    fd.name startswith /bin or
-    fd.name startswith /sbin
 
 # Shell binaries
 - list: shell_binaries
@@ -63,14 +51,6 @@
 # Package management binaries
 - list: package_mgmt_binaries
   items: [apt, apt-get, aptitude, dpkg, yum, dnf, rpm, pacman, zypper, apk, pip, pip3, npm, gem]
-
-# Network tools
-- list: network_tool_binaries
-  items: [nc, ncat, netcat, nmap, socat, telnet, curl, wget]
-
-# Crypto mining
-- list: miner_binaries
-  items: [xmrig, minerd, cpuminer, ethminer, cgminer, bfgminer, nbminer, t-rex]
 
 # Sensitive files
 - list: sensitive_files

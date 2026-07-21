@@ -703,10 +703,10 @@
   desc: Detects potential DNS over HTTPS usage to bypass monitoring
   condition: >
     spawned_process and
-    proc.cmdline contains "dns.google" or
-    proc.cmdline contains "cloudflare-dns.com" or
-    proc.cmdline contains "1.1.1.1/dns-query" or
-    proc.cmdline contains "8.8.8.8/dns-query"
+    (proc.cmdline contains "dns.google" or
+     proc.cmdline contains "cloudflare-dns.com" or
+     proc.cmdline contains "1.1.1.1/dns-query" or
+     proc.cmdline contains "8.8.8.8/dns-query")
   output: "DNS over HTTPS detected user=%user.name command=%proc.cmdline file=%fd.name"
   priority: WARNING
   tags: [command_and_control, doh, mitre_command_and_control, T1071.004]
