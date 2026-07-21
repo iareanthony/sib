@@ -20,11 +20,7 @@
   condition: >
     outbound and
     fd.rip = "169.254.169.254"
-  output: >
-    AWS IMDS network access detected
-    (command=%proc.cmdline user=%user.name container_id=%container.id
-     container_name=%container.name image=%container.image.repository
-     fd.name=%fd.name)
+  output: "AWS IMDS network access detected (command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository fd.name=%fd.name)"
   priority: WARNING
   tags: [cloud, aws, mitre_credential_access, T1552.005]
 
@@ -34,7 +30,7 @@
 
 - rule: AWS Credentials Copied or Exfiltrated
   desc: >
-    Detects commands that read AWS credentials and pipe or redirect them —
+    Detects commands that read AWS credentials and pipe or redirect them â€”
     a common exfiltration pattern after IMDS or file-based credential theft.
   condition: >
     spawned_process and
@@ -48,10 +44,7 @@
      proc.cmdline contains ">>" or
      proc.cmdline contains "| nc" or
      proc.cmdline contains "| ncat")
-  output: >
-    Potential AWS credential exfiltration
-    (command=%proc.cmdline user=%user.name container_id=%container.id
-     container_name=%container.name image=%container.image.repository)
+  output: "Potential AWS credential exfiltration (command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
   priority: HIGH
   tags: [cloud, aws, mitre_exfiltration, T1552.001]
 
@@ -61,7 +54,7 @@
 
 - rule: Cloud Storage Bulk Download
   desc: >
-    Detects bulk data downloads from cloud storage — a common data exfiltration
+    Detects bulk data downloads from cloud storage â€” a common data exfiltration
     technique after credential compromise.
   condition: >
     spawned_process and
@@ -71,10 +64,7 @@
      proc.cmdline contains "gsutil rsync" or
      proc.cmdline contains "azcopy sync" or
      proc.cmdline contains "az storage blob download-batch")
-  output: >
-    Cloud storage bulk download detected
-    (command=%proc.cmdline user=%user.name container_id=%container.id
-     container_name=%container.name image=%container.image.repository)
+  output: "Cloud storage bulk download detected (command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
   priority: WARNING
   tags: [cloud, mitre_exfiltration, T1537]
 
@@ -85,7 +75,7 @@
 - rule: Cloud Service Enumeration
   desc: >
     Detects cloud CLI enumeration of IAM roles, EC2 instances, secrets, or
-    resource policies — commonly used during post-exploitation discovery.
+    resource policies â€” commonly used during post-exploitation discovery.
   condition: >
     spawned_process and
     (proc.cmdline contains "aws iam list" or
@@ -97,10 +87,7 @@
      proc.cmdline contains "gcloud projects list" or
      proc.cmdline contains "az role assignment list" or
      proc.cmdline contains "az keyvault secret list")
-  output: >
-    Cloud service enumeration detected
-    (command=%proc.cmdline user=%user.name container_id=%container.id
-     container_name=%container.name image=%container.image.repository)
+  output: "Cloud service enumeration detected (command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
   priority: WARNING
   tags: [cloud, mitre_discovery, T1526]
 
@@ -120,10 +107,7 @@
      proc.cmdline contains "az keyvault secret show" or
      proc.cmdline contains "vault kv get" or
      proc.cmdline contains "vault read secret")
-  output: >
-    Cloud secrets manager accessed
-    (command=%proc.cmdline user=%user.name container_id=%container.id
-     container_name=%container.name image=%container.image.repository)
+  output: "Cloud secrets manager accessed (command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
   priority: WARNING
   tags: [cloud, mitre_credential_access, T1552.001]
 
@@ -142,9 +126,6 @@
      proc.cmdline contains "crane auth login" or
      proc.cmdline contains "skopeo login" or
      proc.cmdline contains "podman login")
-  output: >
-    Container registry login from within container
-    (command=%proc.cmdline user=%user.name container_id=%container.id
-     container_name=%container.name image=%container.image.repository)
+  output: "Container registry login from within container (command=%proc.cmdline user=%user.name container_id=%container.id container_name=%container.name image=%container.image.repository)"
   priority: HIGH
   tags: [cloud, container, mitre_persistence, T1525]
