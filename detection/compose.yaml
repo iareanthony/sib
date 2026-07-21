@@ -2,7 +2,7 @@
 
 services:
   falco:
-    image: falcosecurity/falco:0.40.0
+    image: falcosecurity/falco:0.44.0
     container_name: sib-falco
     hostname: sib-host
     privileged: true
