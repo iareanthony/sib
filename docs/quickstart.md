@@ -21,7 +21,7 @@ make install
 make demo
 ```
 
-Open Grafana at http://localhost:3000 and watch the dashboards light up!
+Open Grafana at http://localhost:4000 and watch the dashboards light up!
 
 ---
 

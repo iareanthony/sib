@@ -79,7 +79,7 @@ That's it! Your SIB instance is now running.
 
 | Service | URL | Binding | Stack |
 |---------|-----|---------|-------|
-| **Grafana** | http://localhost:3000 | External (0.0.0.0) | Both |
+| **Grafana** | http://localhost:4000 | External (0.0.0.0) | Both |
 | **Sidekick API** | http://localhost:2801 | External (0.0.0.0) | Both |
 | VictoriaLogs | http://localhost:9428 | Localhost only | VM (default) |
 | VictoriaMetrics | http://localhost:8428 | Localhost only | VM (default) |
@@ -199,7 +199,7 @@ grep GRAFANA_ADMIN_PASSWORD .env
 ```
 
 To change it:
-1. Log in to Grafana at http://localhost:3000
+1. Log in to Grafana at http://localhost:4000
 2. Click your profile icon (bottom left)
 3. Select "Change password"
 

@@ -389,7 +389,7 @@ make install
 make demo
 ```
 
-The `make demo` command generates realistic security events across all MITRE ATT&CK categories. Open Grafana at `http://localhost:3000`, go to the MITRE dashboard, and watch it light up.
+The `make demo` command generates realistic security events across all MITRE ATT&CK categories. Open Grafana at `http://localhost:4000`, go to the MITRE dashboard, and watch it light up.
 
 You'll see credential access attempts, container escapes, persistence mechanisms, discovery activity — all simulated, all detected, all mapped to the framework.
 
