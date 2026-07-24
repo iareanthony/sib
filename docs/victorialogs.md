@@ -74,7 +74,7 @@ When using `STACK=vm` (default):
 │                                                          │
 │  ┌──────────────┐                                        │
 │  │   Grafana    │◀───── queries both ─────────────────   │
-│  │   (:3000)    │                                        │
+│  │   (:4000)    │                                        │
 │  └──────────────┘                                        │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -85,7 +85,7 @@ When using `STACK=vm` (default):
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| **Grafana** | http://localhost:3000 | Dashboards and visualization |
+| **Grafana** | http://localhost:4000 | Dashboards and visualization |
 | **VictoriaLogs** | http://localhost:9428 | Log storage and querying |
 | **VictoriaMetrics** | http://localhost:8428 | Metrics storage and querying |
 | **Sidekick API** | http://localhost:2801 | Alert routing UI |

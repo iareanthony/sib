@@ -383,7 +383,7 @@ docker inspect <container-name> --format='{{.State.ExitCode}}'
 
 ```bash
 # Find what's using the port
-sudo lsof -i :3000
+sudo lsof -i :4000
 sudo netstat -tulpn | grep 3000
 
 # Change SIB ports in .env file
